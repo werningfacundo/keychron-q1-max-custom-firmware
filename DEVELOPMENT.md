@@ -1,0 +1,84 @@
+# DEVELOPMENT.md — Keychron Q1 Max Custom Firmware
+
+## Prerequisites
+These are already installed. This section is for reference if setting up on a new machine.
+
+- macOS (Apple Silicon)
+- Homebrew: `/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"`
+- QMK: `pip3 install qmk && qmk setup`
+- Keychron QMK fork: `git clone https://github.com/Keychron/qmk_firmware --branch wireless_playground --recurse-submodules ~/keychron_firmware`
+- Compiler (osx-cross v9, NOT default Homebrew gcc which is broken on Apple Silicon):
+  ```bash
+  brew uninstall --ignore-dependencies arm-none-eabi-binutils
+  brew uninstall --ignore-dependencies arm-none-eabi-gcc
+  brew install osx-cross/arm/arm-none-eabi-gcc@9
+  ```
+
+## Every New Terminal Session
+The compiler PATH is not permanent yet. Run these before compiling:
+```bash
+export PATH="/opt/homebrew/Cellar/arm-none-eabi-gcc@9/9.5.0_2/bin:$PATH"
+export PATH="/opt/homebrew/Cellar/arm-none-eabi-binutils/2.41/bin:$PATH"
+```
+
+To make this permanent (run once):
+```bash
+echo 'export PATH="/opt/homebrew/Cellar/arm-none-eabi-gcc@9/9.5.0_2/bin:$PATH"' >> ~/.zprofile
+echo 'export PATH="/opt/homebrew/Cellar/arm-none-eabi-binutils/2.41/bin:$PATH"' >> ~/.zprofile
+```
+
+## Making Changes
+All user-facing customization is in `config.h`. Edit that file first before touching anything else.
+
+To open the keymap folder in Finder:
+```bash
+open ~/keychron_firmware/keyboards/keychron/q1_max/ansi_encoder/keymaps/mywave/
+```
+
+When editing `.c`, `.h`, or `.inc` files, use a plain text editor that does NOT add smart quotes.
+Recommended: VS Code. Do NOT use TextEdit (corrupts files with smart quotes).
+
+## Compile
+```bash
+cd ~/keychron_firmware
+qmk compile -kb keychron/q1_max/ansi_encoder -km mywave
+```
+A successful compile ends with all `[OK]` lines and a `.bin` file.
+
+## Flash
+```bash
+qmk flash -kb keychron/q1_max/ansi_encoder -km mywave
+```
+When it says "Waiting for bootloader...":
+1. Unplug the USB cable
+2. Hold Esc on the keyboard
+3. Plug the USB cable back in
+4. Release Esc
+
+The keyboard will flash automatically and reboot.
+
+## Compile + Flash in One Command
+```bash
+cd ~/keychron_firmware && qmk compile -kb keychron/q1_max/ansi_encoder -km mywave && qmk flash -kb keychron/q1_max/ansi_encoder -km mywave
+```
+
+## Troubleshooting
+
+**"arm-none-eabi-gcc: command not found"**
+Compiler PATH not set. Run the export commands at the top of this file.
+
+**"bquote>" appears when pasting a command**
+The command contains hidden characters from copy-paste. Press Ctrl+C and retype manually.
+
+**Wave effect is janky/snapping**
+Speed was accidentally changed via Fn+arrow keys. Press Fn+Down Arrow a few times to slow it back down — no reflashing needed.
+
+**Keyboard not detected when flashing**
+Make sure the keyboard is in wired/USB mode (not Bluetooth). The side switch should be set to USB/wired.
+
+**F11 triggers Show Desktop on macOS**
+macOS intercepts F11 at system level. To disable:
+```bash
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 36 "{enabled = 0; value = {parameters = (65535, 103, 8388608); type = standard;};}" && killall SystemUIServer
+```
+Then log out and back in.
