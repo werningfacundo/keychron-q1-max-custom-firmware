@@ -32,7 +32,7 @@ All user-facing customization is in `config.h`. Edit that file first before touc
 
 To open the keymap folder in Finder:
 ```bash
-open ~/keychron_firmware/keyboards/keychron/q1_max/ansi_encoder/keymaps/mywave/
+open ~/keychron_firmware/keyboards/keychron/q1_max/ansi_encoder/keymaps/keychron_q1_max_custom_firmware/
 ```
 
 When editing `.c`, `.h`, or `.inc` files, use a plain text editor that does NOT add smart quotes.
@@ -41,13 +41,13 @@ Recommended: VS Code. Do NOT use TextEdit (corrupts files with smart quotes).
 ## Compile
 ```bash
 cd ~/keychron_firmware
-qmk compile -kb keychron/q1_max/ansi_encoder -km mywave
+qmk compile -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware
 ```
 A successful compile ends with all `[OK]` lines and a `.bin` file.
 
 ## Flash
 ```bash
-qmk flash -kb keychron/q1_max/ansi_encoder -km mywave
+qmk flash -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware
 ```
 When it says "Waiting for bootloader...":
 1. Unplug the USB cable
@@ -59,7 +59,7 @@ The keyboard will flash automatically and reboot.
 
 ## Compile + Flash in One Command
 ```bash
-cd ~/keychron_firmware && qmk compile -kb keychron/q1_max/ansi_encoder -km mywave && qmk flash -kb keychron/q1_max/ansi_encoder -km mywave
+cd ~/keychron_firmware && qmk compile -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware && qmk flash -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware
 ```
 
 ## Troubleshooting
