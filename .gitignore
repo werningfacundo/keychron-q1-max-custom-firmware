@@ -1,0 +1,18 @@
+# Compiled firmware binaries
+*.bin
+*.hex
+*.elf
+*.map
+
+# Build artifacts
+.build/
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor files
+.vscode/
+*.swp
+*.swo

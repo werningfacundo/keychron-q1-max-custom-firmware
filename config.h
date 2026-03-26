@@ -68,4 +68,7 @@
 
 // Enable RGB_MATRIX_CUSTOM_USER -- required for custom wave effect.
 // Do not remove this.
+
+// Firmware version. Update this when making changes.
+#define FIRMWARE_VERSION "1.0.0"
 #define RGB_MATRIX_CUSTOM_USER
