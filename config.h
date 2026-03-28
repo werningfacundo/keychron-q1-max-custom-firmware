@@ -2,17 +2,20 @@
 // config.h - Keychron Q1 Max Custom Firmware
 // =============================================================================
 // All user-facing customization lives here. Edit these values to change
-// the behavior of both projects without touching any other files.
+// the behavior of all projects without touching any other files.
 // After editing, recompile and flash for changes to take effect.
 // =============================================================================
 
 #pragma once
 
+// Firmware version. Update this when making changes.
+#define FIRMWARE_VERSION "1.2.0"
+
 // -----------------------------------------------------------------------------
 // PROJECT 1: Wave Effect
 // -----------------------------------------------------------------------------
 // A smooth sine wave that flows across the keyboard, shifting between two
-// colors. The wave direction, speed, colors, and shape are all configurable.
+// colors. Direction, speed, colors, and shape are all configurable here.
 //
 // Color values use QMK HSV format: hue 0-255, saturation 0-255, value 0-255.
 // Hue reference: 0=red, 43=yellow, 85=green, 128=cyan, 171=blue, 213=magenta
@@ -45,30 +48,60 @@
 // Remaps the F-row to send standard F1-F12 keycodes instead of
 // media/brightness keys. Useful for gaming (e.g. StarCraft 2).
 // Holding Fn while in TSFM mode restores normal media/brightness behavior.
-//
-// Toggle key: the physical key that turns TSFM on and off.
-// Default is the HOME key (row 3, far right).
-// To change: replace SC2_TOG in keymap.c with any keycode, and update
-// TSFM_INDICATOR_LED to match the new key LED index.
 
 // LED index of the toggle key indicator light.
 // Default 57 = HOME key on Q1 Max ANSI 82-key layout.
-// To find a different key index: count keys left-to-right, top-to-bottom
-// starting from 0 (ESC = 0).
-#define TSFM_INDICATOR_LED 57
+#define TSFM_INDICATOR_LED     57
+#define TSFM_INDICATOR_ENABLE   1
+#define TSFM_INDICATOR_R      255
+#define TSFM_INDICATOR_G      255
+#define TSFM_INDICATOR_B      255
 
-// Whether to show the indicator light at all.
-// 1 = enabled, 0 = disabled
-#define TSFM_INDICATOR_ENABLE 1
+// -----------------------------------------------------------------------------
+// PROJECT 3: Sleep / Wake Animation
+// -----------------------------------------------------------------------------
+// When idle, the wave gradually slows and fades to black.
+// On first keypress, a ripple expands outward from the pressed key.
 
-// Indicator color when TSFM is active (default: solid white)
-#define TSFM_INDICATOR_R 255
-#define TSFM_INDICATOR_G 255
-#define TSFM_INDICATOR_B 255
+// How long keyboard must be idle before sleep animation begins (ms)
+// Default: 600000 = 10 minutes (matches Keychron hardware default)
+#define SLEEP_TIMEOUT_MS    600000
 
-// Enable RGB_MATRIX_CUSTOM_USER -- required for custom wave effect.
-// Do not remove this.
+// How long the wave takes to slow down before fading (ms)
+#define SLEEP_SLOWDOWN_MS    30000
 
-// Firmware version. Update this when making changes.
-#define FIRMWARE_VERSION "1.0.0"
+// How long the fade to black takes after wave stops (ms)
+#define SLEEP_FADEOUT_MS     10000
+
+// Wake ripple: set WAKE_RIPPLE_CUSTOM 1 to use custom color, 0 to use wave colors
+#define WAKE_RIPPLE_CUSTOM       0
+#define WAKE_RIPPLE_HUE         85
+#define WAKE_RIPPLE_SAT         15
+#define WAKE_RIPPLE_VAL        230
+
+// How fast the wake ripple expands (higher = faster)
+#define WAKE_RIPPLE_SPEED       80
+
+// How wide the ripple ring is (higher = wider)
+#define WAKE_RIPPLE_WIDTH       30
+
+// -----------------------------------------------------------------------------
+// PROJECT 4: Key Press Glow
+// -----------------------------------------------------------------------------
+// When a key is pressed, a white glow appears under it and fades out.
+// A soft aura spreads to neighboring keys based on distance.
+
+// Maximum simultaneous active glows
+#define GLOW_MAX_COUNT       10
+
+// How long each glow lasts in total (ms)
+#define GLOW_DURATION_MS   1000
+
+// Radius of the aura around the pressed key (in LED position units, 0-255)
+#define GLOW_RADIUS          35
+
+// Peak brightness of glow at center (0-255)
+#define GLOW_BRIGHTNESS     255
+
+// Required for custom RGB effects. Do not remove.
 #define RGB_MATRIX_CUSTOM_USER
