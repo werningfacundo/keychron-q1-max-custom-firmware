@@ -1,7 +1,7 @@
 # Keychron Q1 Max Custom Firmware
 
 Custom QMK firmware for the Keychron Q1 Max (ANSI encoder, wireless).
-Contains four independent projects that work together in a single keymap.
+Contains five independent projects that work together in a single keymap.
 
 ## Projects
 
@@ -19,26 +19,27 @@ default media/brightness behavior. Useful for gaming applications like
 StarCraft 2 where F-keys are used as hotkeys.
 
 - **Toggle:** Press the **HOME** key to switch modes
-- **Indicator:** HOME key glows solid white when TSFM is active
+- **Indicator:** HOME key glows solid blue when TSFM is active, follows wave when off
 - **Fn passthrough:** Holding Fn while TSFM is active restores normal
   media/brightness behavior for that keypress
 - **Default:** TSFM is off on boot (normal media/brightness behavior)
 
-#### F-key mapping when TSFM is active
-| Key position | Sends |
-|---|---|
-| F1 | Brightness down |
-| F2 | Brightness up |
-| F3 | Mission Control |
-| F4 | Launchpad |
-| F5 | RGB brightness - |
-| F6 | RGB brightness + |
-| F7 | Previous track |
-| F8 | Play/pause |
-| F9 | Next track |
-| F10 | Mute |
-| F11 | Volume down |
-| F12 | Volume up |
+#### F-key behavior by mode
+
+| Key | Default (TSFM off) | TSFM active |
+|-----|-------------------|-------------|
+| F1  | Brightness down   | F1          |
+| F2  | Brightness up     | F2          |
+| F3  | Mission Control   | F3          |
+| F4  | Launchpad         | F4          |
+| F5  | RGB brightness -  | F5          |
+| F6  | RGB brightness +  | F6          |
+| F7  | Previous track    | F7          |
+| F8  | Play/pause        | F8          |
+| F9  | Next track        | F9          |
+| F10 | Mute              | F10         |
+| F11 | Volume down       | F11         |
+| F12 | Volume up         | F12         |
 
 ### 3. Sleep/Wake Animation
 When the keyboard is idle for 10 minutes, the wave effect gradually slows,
@@ -54,6 +55,42 @@ Pressing the same key resets its timer. If the cap is reached, the oldest
 glow is dropped to make room.
 
 Glow size, brightness, duration, and max count are configurable in `config.h`.
+
+### 5. Mic Mute
+Press **PAGE DOWN** to toggle microphone mute system-wide on macOS. Works
+with all apps including Zoom and WhatsApp by swapping the default audio input
+device to BlackHole (a silent virtual driver) rather than adjusting volume,
+which those apps ignore.
+
+- **PAGE DOWN LED glows red** when muted
+- **PAGE DOWN LED glows blue** when active (unmuted)
+- Requires BlackHole and the companion daemon (see below)
+
+#### macOS Setup
+
+**1. Install BlackHole:**
+```bash
+brew install blackhole-2ch
+```
+Then reboot (required for the driver to activate).
+
+**2. Install pynput:**
+```bash
+pip3 install pynput
+```
+
+**3. Install the daemon:**
+```bash
+python3 ~/path/to/mic_mute_blackhole_daemon.py --install
+```
+
+The daemon runs at login, listens for `Cmd+Shift+Ctrl+Opt+M` (sent by the
+keyboard on PAGE DOWN), and swaps the default input device. Log: `/tmp/micmute.log`.
+
+**Behavior:**
+- On startup: always forces unmuted, restores a real mic if BlackHole was left as default
+- On mute: saves current default input, sets BlackHole as default
+- On unmute: restores saved device; falls back to built-in mic if that device was unplugged
 
 ## Customization
 
@@ -77,10 +114,10 @@ Hue reference: `0=red  43=yellow  85=green  128=cyan  171=blue  213=magenta`
 
 ### TSFM settings
 ```c
-#define TSFM_INDICATOR_LED    57    // LED index of toggle key (57 = HOME on Q1 Max ANSI 82)
+#define TSFM_INDICATOR_LED    57    // LED index of toggle key (57 = HOME on Q1 Max ANSI)
 #define TSFM_INDICATOR_ENABLE 1     // 1=show indicator light, 0=hide
-#define TSFM_INDICATOR_R      255   // indicator color (default: white)
-#define TSFM_INDICATOR_G      255
+#define TSFM_INDICATOR_R      0     // indicator color (blue)
+#define TSFM_INDICATOR_G      0
 #define TSFM_INDICATOR_B      255
 ```
 
@@ -101,13 +138,26 @@ Hue reference: `0=red  43=yellow  85=green  128=cyan  171=blue  213=magenta`
 #define GLOW_BRIGHTNESS     255     // peak brightness (0-255)
 ```
 
+### Mic Mute settings
+```c
+#define MIC_INDICATOR_LED    43     // LED index of PAGE DOWN key
+#define MIC_INDICATOR_ENABLE 1      // 1=show indicator, 0=hide
+#define MIC_MUTED_R          255    // red = muted
+#define MIC_MUTED_G          0
+#define MIC_MUTED_B          0
+#define MIC_ACTIVE_R         0      // blue = active
+#define MIC_ACTIVE_G         0
+#define MIC_ACTIVE_B         255
+```
+
 ## Files
 
 | File | Purpose |
 |---|---|
 | `config.h` | All user customization |
-| `keymap.c` | Layer keymaps + TSFM logic |
+| `keymap.c` | Layer keymaps, TSFM logic, mic mute key handling, RGB indicators |
 | `rgb_matrix_user.inc` | Wave, glow, and sleep/wake animations |
+| `mic_mute_blackhole_daemon.py` | macOS daemon for system-wide mic mute (Project 5) |
 | `DEVELOPMENT.md` | Setup, compile, and flash instructions |
 | `AGENTS.md` | Context file for AI coding agents |
 | `CHANGELOG.md` | Version history |

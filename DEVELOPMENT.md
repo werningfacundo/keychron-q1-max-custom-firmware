@@ -13,18 +13,34 @@ These are already installed. This section is for reference if setting up on a ne
   brew uninstall --ignore-dependencies arm-none-eabi-gcc
   brew install osx-cross/arm/arm-none-eabi-gcc@9
   ```
+- Compiler PATH is permanently set in `~/.zprofile` — run `source ~/.zprofile` at the start of a new terminal session before compiling.
 
-## Every New Terminal Session
-The compiler PATH is not permanent yet. Run these before compiling:
+## Project 5: macOS Mic Mute Daemon
+
+The mic mute feature requires two things outside the firmware:
+
+**1. BlackHole virtual audio driver:**
 ```bash
-export PATH="/opt/homebrew/Cellar/arm-none-eabi-gcc@9/9.5.0_2/bin:$PATH"
-export PATH="/opt/homebrew/Cellar/arm-none-eabi-binutils/2.41/bin:$PATH"
+brew install blackhole-2ch
+```
+Reboot after installing — required for the driver to activate.
+
+**2. pynput Python library:**
+```bash
+pip3 install pynput
 ```
 
-To make this permanent (run once):
+**3. Install and start the daemon:**
 ```bash
-echo 'export PATH="/opt/homebrew/Cellar/arm-none-eabi-gcc@9/9.5.0_2/bin:$PATH"' >> ~/.zprofile
-echo 'export PATH="/opt/homebrew/Cellar/arm-none-eabi-binutils/2.41/bin:$PATH"' >> ~/.zprofile
+python3 ~/keychron_firmware/keyboards/keychron/q1_max/ansi_encoder/keymaps/keychron_q1_max_custom_firmware/mic_mute_blackhole_daemon.py --install
+```
+
+This registers the daemon as a login item. It starts automatically on login.
+Log file: `/tmp/micmute.log`
+
+To uninstall:
+```bash
+launchctl unload ~/Library/LaunchAgents/com.keychron.micmute.plist && rm ~/Library/LaunchAgents/com.keychron.micmute.plist
 ```
 
 ## Making Changes
@@ -40,7 +56,7 @@ Recommended: VS Code. Do NOT use TextEdit (corrupts files with smart quotes).
 
 ## Compile
 ```bash
-cd ~/keychron_firmware
+source ~/.zprofile && cd ~/keychron_firmware
 qmk compile -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware
 ```
 A successful compile ends with all `[OK]` lines and a `.bin` file.
@@ -59,13 +75,13 @@ The keyboard will flash automatically and reboot.
 
 ## Compile + Flash in One Command
 ```bash
-cd ~/keychron_firmware && qmk compile -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware && qmk flash -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware
+source ~/.zprofile && cd ~/keychron_firmware && qmk compile -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware && qmk flash -kb keychron/q1_max/ansi_encoder -km keychron_q1_max_custom_firmware
 ```
 
 ## Troubleshooting
 
 **"arm-none-eabi-gcc: command not found"**
-Compiler PATH not set. Run the export commands at the top of this file.
+Run `source ~/.zprofile` first.
 
 **"bquote>" appears when pasting a command**
 The command contains hidden characters from copy-paste. Press Ctrl+C and retype manually.
@@ -82,3 +98,6 @@ macOS intercepts F11 at system level. To disable:
 defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 36 "{enabled = 0; value = {parameters = (65535, 103, 8388608); type = standard;};}" && killall SystemUIServer
 ```
 Then log out and back in.
+
+**Mic mute has no effect on Zoom or WhatsApp**
+Make sure the daemon is running (`cat /tmp/micmute.log`) and BlackHole is installed and visible in System Settings → Sound. If BlackHole is missing, reinstall it and reboot.

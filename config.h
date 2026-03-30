@@ -53,8 +53,8 @@
 // Default 57 = HOME key on Q1 Max ANSI 82-key layout.
 #define TSFM_INDICATOR_LED     57
 #define TSFM_INDICATOR_ENABLE   1
-#define TSFM_INDICATOR_R      255
-#define TSFM_INDICATOR_G      255
+#define TSFM_INDICATOR_R        0
+#define TSFM_INDICATOR_G        0
 #define TSFM_INDICATOR_B      255
 
 // -----------------------------------------------------------------------------
@@ -105,3 +105,14 @@
 
 // Required for custom RGB effects. Do not remove.
 #define RGB_MATRIX_CUSTOM_USER
+
+// --- Mic Mute Indicator (Project 5) ---
+#define MIC_INDICATOR_LED    43       // PAGE DOWN key
+#define MIC_INDICATOR_ENABLE 1
+#define MIC_MUTED_R          255      // red when muted
+#define MIC_MUTED_G          0
+#define MIC_MUTED_B          0
+#define MIC_ACTIVE_R         0        // blue when active
+#define MIC_ACTIVE_G         0
+#define MIC_ACTIVE_B         255
+

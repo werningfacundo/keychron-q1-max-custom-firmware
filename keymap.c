@@ -5,6 +5,8 @@
 // PROJECT 2: TSFM - HOME toggles F-row, glows white when active
 // PROJECT 3: Sleep/Wake - idle timer, slowdown, fadeout, wake ripple
 // PROJECT 4: Key Press Glow - white glow under pressed keys, fades over 1s
+// PROJECT 5: Mic Mute - PAGE DOWN toggles mic mute via system script
+// PROJECT 5: Mic Mute - PAGE DOWN toggles mic, red = muted, blue = unmuted
 // =============================================================================
 
 #include QMK_KEYBOARD_H
@@ -40,6 +42,9 @@ uint8_t glow_count = 0;
 static bool tsfm_active = false;
 static bool fn_held     = false;
 
+// --- Mic Mute state ---
+static bool mic_muted = false;
+
 // --- Layers ---
 enum layers {
     MAC_BASE,
@@ -51,6 +56,7 @@ enum layers {
 // --- Custom keycodes ---
 enum custom_keycodes {
     TSFM_TOG = SAFE_RANGE,
+    MIC_TOG,
 };
 
 // --- Keymaps ---
@@ -59,7 +65,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [MAC_BASE] = LAYOUT_ansi_82(
         KC_ESC,   KC_BRID,  KC_BRIU,  KC_MCTRL, KC_LNPAD, RGB_VAD,  RGB_VAI,  KC_MPRV,  KC_MPLY,  KC_MNXT,  KC_MUTE,  KC_VOLD,  KC_VOLU,  KC_DEL,             KC_MUTE,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,            KC_PGUP,
-        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,            KC_PGDN,
+        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,            MIC_TOG,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,            KC_ENT,             TSFM_TOG,
         KC_LSFT,            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_RSFT,  KC_UP,
         KC_LCTL,  KC_LOPTN, KC_LCMMD,                               KC_SPC,                                 KC_RCMMD,MO(MAC_FN),KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
@@ -75,7 +81,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [WIN_BASE] = LAYOUT_ansi_82(
         KC_ESC,   KC_F1,    KC_F2,    KC_F3,    KC_F4,    KC_F5,    KC_F6,    KC_F7,    KC_F8,    KC_F9,    KC_F10,   KC_F11,   KC_F12,   KC_DEL,             KC_MUTE,
         KC_GRV,   KC_1,     KC_2,     KC_3,     KC_4,     KC_5,     KC_6,     KC_7,     KC_8,     KC_9,     KC_0,     KC_MINS,  KC_EQL,   KC_BSPC,            KC_PGUP,
-        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,            KC_PGDN,
+        KC_TAB,   KC_Q,     KC_W,     KC_E,     KC_R,     KC_T,     KC_Y,     KC_U,     KC_I,     KC_O,     KC_P,     KC_LBRC,  KC_RBRC,  KC_BSLS,            MIC_TOG,
         KC_CAPS,  KC_A,     KC_S,     KC_D,     KC_F,     KC_G,     KC_H,     KC_J,     KC_K,     KC_L,     KC_SCLN,  KC_QUOT,            KC_ENT,             TSFM_TOG,
         KC_LSFT,            KC_Z,     KC_X,     KC_C,     KC_V,     KC_B,     KC_N,     KC_M,     KC_COMM,  KC_DOT,   KC_SLSH,            KC_RSFT,  KC_UP,
         KC_LCTL,  KC_LGUI,  KC_LALT,                                KC_SPC,                                 KC_RALT, MO(WIN_FN),KC_RCTL,  KC_LEFT,  KC_DOWN,  KC_RGHT),
@@ -208,6 +214,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             }
             return false;
 
+        case MIC_TOG:
+            if (record->event.pressed) {
+                mic_muted = !mic_muted;
+                register_code(KC_LGUI);
+                register_code(KC_LSFT);
+                register_code(KC_LCTL);
+                register_code(KC_LOPT);
+                tap_code(KC_M);
+                unregister_code(KC_LOPT);
+                unregister_code(KC_LCTL);
+                unregister_code(KC_LSFT);
+                unregister_code(KC_LGUI);
+            }
+            return false;
+
         default:
             break;
     }
@@ -264,6 +285,13 @@ bool rgb_matrix_indicators_user(void) {
                              TSFM_INDICATOR_R,
                              TSFM_INDICATOR_G,
                              TSFM_INDICATOR_B);
+    }
+#endif
+#if MIC_INDICATOR_ENABLE
+    if (mic_muted) {
+        rgb_matrix_set_color(MIC_INDICATOR_LED, MIC_MUTED_R, MIC_MUTED_G, MIC_MUTED_B);
+    } else {
+        rgb_matrix_set_color(MIC_INDICATOR_LED, MIC_ACTIVE_R, MIC_ACTIVE_G, MIC_ACTIVE_B);
     }
 #endif
     return true;
